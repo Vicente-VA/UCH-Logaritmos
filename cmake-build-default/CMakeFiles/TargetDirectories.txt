@@ -1,0 +1,3 @@
+/home/vicente-va/Documents/Universidad/Logaritmos/T1/cmake-build-default/CMakeFiles/T1.dir
+/home/vicente-va/Documents/Universidad/Logaritmos/T1/cmake-build-default/CMakeFiles/edit_cache.dir
+/home/vicente-va/Documents/Universidad/Logaritmos/T1/cmake-build-default/CMakeFiles/rebuild_cache.dir
