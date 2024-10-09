@@ -1,16 +1,16 @@
 #include <iostream>
 #include <cstdint>
 #include <random>
+#include <array>
 
-#define PAGE_SIZE 1024;
-#define ELEMENT_SIZE 64;
+#define PAGE_SIZE 1024
+#define ELEMENT_SIZE 64
 
 struct Page {
-    std::vector<long long> items;
+    std::array<long long, 16> items;
     long long n_items;
 
-    Page() : n_items(0), items({}) {
-    } // Constructor to initialize n_items
+    Page() : n_items(0), items({}) { } // Constructor to initialize n_items
 };
 
 class HashingTable {
@@ -26,48 +26,37 @@ private:
         return dist(gen);
     }
 
-
     long long a;
     long long b;
 
     long long hashingFunc(long long y) {
-        return (a * y + b) % (1 << (t + 1));
+        return (a * y + b);
     }
 
 public:
-    std::vector<std::vector<Page> > table; // Tabla
-    HashingTable(int max_cost) : p(1), t(0), max_cost(max_cost),
-                                 a(randomULL()), b(randomULL()) {
+    std::vector<std::vector<Page> > table; // Table
+    HashingTable(int max_cost) : p(1), t(0), max_cost(max_cost), a(randomULL()), b(randomULL()) {
         table.emplace_back(std::vector<Page>{Page()}); // First page
         table.emplace_back(std::vector<Page>{Page()}); // Second page
-
     }
 
-    void insert(long long value) {
-        long long k = hashingFunc(value);
+    void insert(long long y) {
+        long long k = hashingFunc(y) % (1 << (t + 1)); // k = h(y) mod 2^(t+1)
+        k = (p <= k) ? k - (1 << t) : k; // if p <= k the page is not yet created
 
-        if (k < p) {
-            for (auto &page: table[k]) {
-                if (page.n_items < 16) {
-                    page.items.push_back(value);
-                    page.n_items++;
-                    return;
-                }
+        bool was_inserted = false;
+        for (auto &page: table[k]) {
+            if (page.n_items < 16) {
+                page.items[page.n_items - 1] = y;
+                page.n_items++;
+                was_inserted = true;
+                break;
             }
+        }
+        if (!was_inserted){
             Page p = Page();
-            p.items.push_back(value);
+            p.items[0] = y;
             table[k].emplace_back(p);
-        } else {
-            for (auto &page: table[k - static_cast<long long>(pow(2, t))]) {
-                if (page.n_items < 16) {
-                    page.items.push_back(value);
-                    page.n_items++;
-                    return;
-                }
-            }
-            Page p = Page();
-            p.items.push_back(value);
-            table[k - static_cast<long long>(pow(2, t))].emplace_back(p);
         }
 
         long long total_rebalses = 0;
@@ -122,7 +111,7 @@ public:
         table.emplace_back(nuevo_p);
 
         // Update 't' if needed
-        if (p == static_cast<long long>(pow(2, t + 1))) {
+        if (p == (1LL << (t + 1))) {
             t++;
         }
     }
