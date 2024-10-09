@@ -28,21 +28,28 @@ struct HT {
         table->pages[0]->n_items = 0;
         table->n_pages = 1;
         table->t = 0;
-        table->p = 0;
+        table->p = 1;
         return table;
     }
 
 };
 
-uint64_t HT_function() {
+uint64_t randomULL() {
     std::random_device rd;
     std::mt19937_64 gen(rd());
-    std::uniform_int_distribution<uint64_t> dist(0, UINT64_MAX); // UINT64_MAX es 2^64 - 1
+    std::uniform_int_distribution<uint64_t> dist(1, 1<<16); // UINT64_MAX es 2^64 - 1
     return dist(gen);
 }
 
+uint64_t a = randomULL();
+uint64_t b = randomULL();
+
+uint64_t HT_func(uint64_t key, int t){
+    return (a * key + b) % (1<<(t+1));
+}
+
 void HT_insert(HT* table, long long key, long long value) {
-    uint64_t hash_value = HT_function();
+    uint64_t hash_value = HT_func(key, table->t);
     int k = hash_value % (1 << (table->t + 1));
 
     if (k < table->p) {
